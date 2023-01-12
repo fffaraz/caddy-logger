@@ -64,7 +64,7 @@ func readConn(conn net.Conn, db *gorm.DB, wg *sync.WaitGroup) {
 			continue
 		}
 		infoStr, _ := json.Marshal(info)
-		fmt.Println(string(infoStr) + "\n")
+		fmt.Println(string(infoStr))
 	}
 	wg.Done()
 }
