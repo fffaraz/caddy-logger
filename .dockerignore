@@ -1,2 +1,4 @@
-.git
-volumes
+.git/
+volumes/
+*.exe
+caddy-logger

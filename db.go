@@ -22,8 +22,9 @@ type Log struct {
 	Host           string        `gorm:"index"`
 	Uri            string        ``
 	UserAgent      string        ``
+	CfRay          string        `` // Cloudflare Ray ID
 	CfConnectingIp string        ``
-	CfIpcountry    string        ``
+	CfIPCountry    string        ``
 	XForwardedFor  string        ``
 	TlsServerName  string        ``
 }
