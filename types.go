@@ -1,6 +1,6 @@
 package main
 
-type LogTls struct {
+type Tls struct {
 	Resumed     bool   `json:"resumed"`
 	Version     int    `json:"version"`
 	CipherSuite int    `json:"cipher_suite"`
@@ -8,7 +8,7 @@ type LogTls struct {
 	ServerName  string `json:"server_name"`
 }
 
-type LogRequest struct {
+type Request struct {
 	RemoteIp   string              `json:"remote_ip"`
 	RemotePort string              `json:"remote_port"`
 	Proto      string              `json:"proto"`
@@ -16,10 +16,10 @@ type LogRequest struct {
 	Host       string              `json:"host"`
 	Uri        string              `json:"uri"`
 	Headers    map[string][]string `json:"headers"`
-	Tls        *LogTls             `json:"tls,omitempty"`
+	Tls        *Tls                `json:"tls,omitempty"`
 }
 
-type LogMessage struct {
+type Message struct {
 	Level       string              `json:"level"`
 	Ts          float64             `json:"ts"`
 	Logger      string              `json:"logger"`
@@ -28,7 +28,7 @@ type LogMessage struct {
 	Duration    float64             `json:"duration"`
 	Size        int64               `json:"size"`
 	Status      int                 `json:"status"`
-	Request     LogRequest          `json:"request"`
+	Request     Request             `json:"request"`
 	RespHeaders map[string][]string `json:"resp_headers"`
 	/*
 		Signal      string          `json:"signal,omitempty"`

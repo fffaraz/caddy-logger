@@ -9,22 +9,23 @@ import (
 
 // "gorm.io/driver/sqlite"
 
-type LogInfo struct {
-	TimeStamp      time.Time
-	Duration       time.Duration
-	Size           int64
-	Status         int
-	RemoteIp       string
-	RemotePort     int
-	Proto          string
-	Method         string
-	Host           string
-	Uri            string
-	UserAgent      string
-	CfConnectingIp string
-	CfIpcountry    string
-	XForwardedFor  string
-	TlsServerName  string
+type Log struct {
+	ID             uint          `gorm:"primarykey"`
+	TimeStamp      time.Time     ``
+	Duration       time.Duration ``
+	Size           int64         ``
+	Status         int           `gorm:"index"`
+	RemoteIp       string        `gorm:"index"`
+	RemotePort     int           ``
+	Proto          string        ``
+	Method         string        ``
+	Host           string        `gorm:"index"`
+	Uri            string        ``
+	UserAgent      string        ``
+	CfConnectingIp string        ``
+	CfIpcountry    string        ``
+	XForwardedFor  string        ``
+	TlsServerName  string        ``
 }
 
 func getDB(dbPath string) (*gorm.DB, error) {
@@ -33,7 +34,7 @@ func getDB(dbPath string) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	if err := db.AutoMigrate(&LogInfo{}); err != nil {
+	if err := db.AutoMigrate(&Log{}); err != nil {
 		return nil, err
 	}
 

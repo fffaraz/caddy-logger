@@ -34,7 +34,7 @@ func getUnixConn(socketAddr string) (net.Conn, error) {
 
 func getUdpConn(listenPort int) (net.Conn, error) {
 	conn, err := net.ListenUDP("udp", &net.UDPAddr{
-		IP:   net.IPv4(0, 0, 0, 0),
+		IP:   net.IPv4(127, 0, 0, 1),
 		Port: listenPort,
 	})
 	if err != nil {
@@ -54,7 +54,7 @@ func readConn(conn net.Conn, db *gorm.DB, wg *sync.WaitGroup) {
 			fmt.Println("Error reading:", err)
 			break
 		}
-		_, info, err := getLogMessage(buf[:nr])
+		_, info, err := getMessage(buf[:nr])
 		if err != nil {
 			fmt.Println("Error getting log message:", err)
 			continue
