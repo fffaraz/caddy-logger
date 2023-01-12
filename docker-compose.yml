@@ -2,10 +2,10 @@ version: '3'
 
 services:
   app:
-    image: fffaraz/caddy-logger:latest
     build: .
+    image: fffaraz/caddy-logger:latest
     restart: always
     network_mode: host
-    command: -d /opt/logger/db.sqlite -p 5000
+    command: -d /srv/db.sqlite -p 5000
     volumes:
-      - ./volumes/logger:/opt/logger
+      - ./volumes:/srv
