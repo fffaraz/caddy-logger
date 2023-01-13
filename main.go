@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"net"
 	"os"
 	"os/signal"
@@ -12,6 +11,7 @@ import (
 )
 
 func main() {
+	apiPort := flag.Int("a", 0, "api port")
 	dbPath := flag.String("d", "", "database path")
 	listenPort := flag.Int("p", 0, "listen port")
 	socketAddr := flag.String("s", "", "socket address")
@@ -19,24 +19,31 @@ func main() {
 
 	db, err := getDB(*dbPath)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("Error opening database:", err)
+		return
+	}
+
+	if *apiPort != 0 {
+		go startApi(*apiPort, db)
 	}
 
 	var conn net.Conn
 	if *socketAddr != "" {
 		conn, err = getUnixConn(*socketAddr)
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println("Error opening socket:", err)
+			return
 		}
 	}
 	if *listenPort != 0 {
 		conn, err = getUdpConn(*listenPort)
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println("Error opening port:", err)
+			return
 		}
 	}
 	if conn == nil {
-		log.Fatal("No connection")
+		fmt.Println("No connection specified")
 	}
 
 	var wg sync.WaitGroup
@@ -54,6 +61,5 @@ func main() {
 		os.Remove(*socketAddr)
 	}
 
-	fmt.Println()
-	log.Println("Exiting")
+	fmt.Println("\nExiting")
 }

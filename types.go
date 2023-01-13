@@ -1,24 +1,5 @@
 package main
 
-type Tls struct {
-	Resumed     bool   `json:"resumed"`
-	Version     int    `json:"version"`
-	CipherSuite int    `json:"cipher_suite"`
-	Proto       string `json:"proto"`
-	ServerName  string `json:"server_name"`
-}
-
-type Request struct {
-	RemoteIp   string              `json:"remote_ip"`
-	RemotePort string              `json:"remote_port"`
-	Proto      string              `json:"proto"`
-	Method     string              `json:"method"`
-	Host       string              `json:"host"`
-	Uri        string              `json:"uri"`
-	Headers    map[string][]string `json:"headers"`
-	Tls        *Tls                `json:"tls,omitempty"`
-}
-
 type Message struct {
 	Level       string              `json:"level"`
 	Ts          float64             `json:"ts"`
@@ -36,4 +17,23 @@ type Message struct {
 		Address     string          `json:"address,omitempty"`
 		ExitCode    int             `json:"exit_code,omitempty"`
 	*/
+}
+
+type Request struct {
+	RemoteIp   string              `json:"remote_ip"`
+	RemotePort string              `json:"remote_port"`
+	Proto      string              `json:"proto"`
+	Method     string              `json:"method"`
+	Host       string              `json:"host"`
+	Uri        string              `json:"uri"`
+	Headers    map[string][]string `json:"headers"`
+	Tls        *Tls                `json:"tls,omitempty"`
+}
+
+type Tls struct {
+	Resumed     bool   `json:"resumed"`
+	Version     int    `json:"version"`
+	CipherSuite int    `json:"cipher_suite"`
+	Proto       string `json:"proto"`
+	ServerName  string `json:"server_name"`
 }
