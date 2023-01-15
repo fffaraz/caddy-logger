@@ -28,7 +28,7 @@ func startApi(port int, db *gorm.DB) {
 	})
 
 	fmt.Printf("Starting API on port %d\n", port)
-	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
+	if err := http.ListenAndServe(fmt.Sprintf("127.0.0.1:%d", port), nil); err != nil {
 		fmt.Println("API error:", err)
 	}
 }
