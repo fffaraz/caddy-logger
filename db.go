@@ -3,11 +3,11 @@ package main
 import (
 	"time"
 
-	"github.com/glebarez/sqlite"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
-// "gorm.io/driver/sqlite"
+// "github.com/glebarez/sqlite"
 
 type Log struct {
 	ID             uint          `gorm:"primarykey"`
