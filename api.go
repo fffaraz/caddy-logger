@@ -15,8 +15,15 @@ func startApi(port int, db *gorm.DB) {
 	})
 
 	http.HandleFunc("/hosts", func(w http.ResponseWriter, r *http.Request) {
+		orderBy := "host"
+		switch r.URL.Query().Get("sort") {
+		case "hits":
+			orderBy = "hits DESC"
+		case "traffic":
+			orderBy = "traffic DESC"
+		}
 		var results []ResultHost
-		tx := db.Raw("SELECT host, COUNT(id) AS hits, SUM(size) AS traffic FROM logs GROUP BY host ORDER BY host").Scan(&results)
+		tx := db.Raw("SELECT host, COUNT(id) AS hits, SUM(size) AS traffic FROM logs GROUP BY host ORDER BY " + orderBy).Scan(&results)
 		if tx.Error != nil {
 			fmt.Fprintf(w, "Error: %s", tx.Error)
 			return
