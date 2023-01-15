@@ -44,6 +44,7 @@ func main() {
 	}
 	if conn == nil {
 		fmt.Println("No connection specified")
+		return
 	}
 
 	var wg sync.WaitGroup
