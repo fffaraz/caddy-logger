@@ -52,6 +52,24 @@ func startApi(port int, db *gorm.DB) {
 		}
 	})
 
+	http.HandleFunc("/logs", func(w http.ResponseWriter, r *http.Request) {
+		var results []Log
+		tx := db.Order("id DESC").Limit(1000).Find(&results)
+		if tx.Error != nil {
+			fmt.Fprintf(w, "Error: %s", tx.Error)
+			return
+		}
+		fmt.Fprintf(w, "ID\tTimeStamp\tDuration\tSize\tStatus\tRemoteIp\tRemotePort\tProto\tMethod\tHost\tUri\tUserAgent\tCfRay\tCfConnectingIp\tCfIPCountry\tXForwardedFor\tTlsServerName\n")
+		for _, result := range results {
+			fmt.Fprintf(w, "%d\t%s\t%d\t%d\t%d\t%s\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", result.ID, result.TimeStamp, result.Duration, result.Size, result.Status, result.RemoteIp, result.RemotePort, result.Proto, result.Method, result.Host, result.Uri, result.UserAgent, result.CfRay, result.CfConnectingIp, result.CfIPCountry, result.XForwardedFor, result.TlsServerName)
+		}
+	})
+
+	http.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("404 - Not Found"))
+	})
+
 	fmt.Printf("Starting API on port %d\n", port)
 	if err := http.ListenAndServe(fmt.Sprintf("127.0.0.1:%d", port), nil); err != nil {
 		fmt.Println("API error:", err)
