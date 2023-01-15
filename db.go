@@ -30,7 +30,8 @@ type Log struct {
 }
 
 func getDB(dbPath string) (*gorm.DB, error) {
-	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
+	// _pragma=journal_mode(wal)
+	db, err := gorm.Open(sqlite.Open(dbPath+"?_journal_mode=wal"), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
