@@ -64,9 +64,14 @@ func getDomain(host string) string {
 	}
 
 	parts := strings.Split(host, ".")
-	if len(parts) > 2 {
-		return strings.Join(parts[len(parts)-2:], ".")
+	if len(parts) <= 2 {
+		return host
 	}
 
-	return host
+	tld := parts[len(parts)-1]
+	if _, err := strconv.Atoi(tld); err == nil {
+		return host // IPv4
+	}
+
+	return strings.Join(parts[len(parts)-2:], ".")
 }
