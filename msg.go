@@ -47,7 +47,9 @@ func getHeader(msg *Message, key string) string {
 }
 
 func getDomain(host string) string {
-	if len(host) < 2 {
+	host = strings.ToLower(host)
+
+	if len(host) < 4 {
 		return host
 	}
 
