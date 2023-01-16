@@ -19,7 +19,8 @@ type Log struct {
 	RemotePort     int           ``
 	Proto          string        ``
 	Method         string        ``
-	Host           string        `gorm:"index"`
+	Host           string        ``
+	Domain         string        `gorm:"index"`
 	Uri            string        ``
 	UserAgent      string        ``
 	CfRay          string        `` // Cloudflare Ray ID

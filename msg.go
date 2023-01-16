@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -24,6 +25,7 @@ func getMessage(buf []byte) (*Message, *Log, error) {
 	log.Proto = msg.Request.Proto
 	log.Method = msg.Request.Method
 	log.Host = msg.Request.Host
+	log.Domain = getDomain(msg.Request.Host)
 	log.Uri = msg.Request.Uri
 	log.UserAgent = getHeader(msg, "User-Agent")
 	log.CfRay = getHeader(msg, "CF-Ray")
@@ -42,4 +44,29 @@ func getHeader(msg *Message, key string) string {
 		return msg.Request.Headers[key][0]
 	}
 	return ""
+}
+
+func getDomain(host string) string {
+	if len(host) < 2 {
+		return host
+	}
+
+	if i := strings.Index(host, "]:"); i >= 0 {
+		return host[1:i] // IPv6 + port
+	}
+
+	if host[0] == '[' {
+		return host[1 : len(host)-1] // IPv6
+	}
+
+	if i := strings.IndexByte(host, ':'); i >= 0 {
+		host = host[:i] // remove port
+	}
+
+	parts := strings.Split(host, ".")
+	if len(parts) > 2 {
+		return strings.Join(parts[len(parts)-2:], ".")
+	}
+
+	return host
 }

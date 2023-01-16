@@ -14,34 +14,42 @@ func startApi(port int, db *gorm.DB) {
 		fmt.Fprintf(w, "Hello, %s\n%d\n", r.RemoteAddr, count)
 	})
 
-	http.HandleFunc("/hosts", func(w http.ResponseWriter, r *http.Request) {
-		orderBy := "host"
+	http.HandleFunc("/domains", func(w http.ResponseWriter, r *http.Request) {
+		orderBy := "domain"
 		switch r.URL.Query().Get("sort") {
 		case "hits":
 			orderBy = "hits DESC"
 		case "traffic":
 			orderBy = "traffic DESC"
 		}
-		var results []resultHosts
-		tx := db.Raw("SELECT host, COUNT(id) AS hits, SUM(size) AS traffic FROM logs GROUP BY host ORDER BY " + orderBy).Scan(&results)
+		var results []struct {
+			Domain  string
+			Hits    int
+			Traffic int64
+		}
+		tx := db.Raw("SELECT domain, COUNT(id) AS hits, SUM(size) AS traffic FROM logs GROUP BY domain ORDER BY " + orderBy).Scan(&results)
 		if tx.Error != nil {
 			fmt.Fprintf(w, "Error: %s", tx.Error)
 			return
 		}
-		fmt.Fprintf(w, "Host\tHits\tTraffic\n")
+		fmt.Fprintf(w, "Domain\tHits\tTraffic\n")
 		for _, result := range results {
-			fmt.Fprintf(w, "%s\t%d\t%d\n", result.Host, result.Hits, result.Traffic)
+			fmt.Fprintf(w, "%s\t%d\t%d\n", result.Domain, result.Hits, result.Traffic)
 		}
 	})
 
-	http.HandleFunc("/host", func(w http.ResponseWriter, r *http.Request) {
-		host := r.URL.Query().Get("h")
-		if host == "" {
-			fmt.Fprintf(w, "Error: missing host (?h=...) parameter")
+	http.HandleFunc("/domain", func(w http.ResponseWriter, r *http.Request) {
+		domain := r.URL.Query().Get("d")
+		if domain == "" {
+			fmt.Fprintf(w, "Error: missing domain (?d=...) parameter")
 			return
 		}
-		var results []resultHost
-		tx := db.Raw("SELECT date(time_stamp) AS date, COUNT(id) AS hits, SUM(size) AS traffic FROM logs WHERE host like ? OR host like ? GROUP BY date(time_stamp) ORDER BY date(time_stamp) DESC", host, "%."+host).Scan(&results)
+		var results []struct {
+			Date    string
+			Hits    int
+			Traffic int64
+		}
+		tx := db.Raw("SELECT date(time_stamp) AS date, COUNT(id) AS hits, SUM(size) AS traffic FROM logs WHERE domain like ? GROUP BY date(time_stamp) ORDER BY date(time_stamp) DESC", domain).Scan(&results)
 		if tx.Error != nil {
 			fmt.Fprintf(w, "Error: %s", tx.Error)
 			return
@@ -59,9 +67,25 @@ func startApi(port int, db *gorm.DB) {
 			fmt.Fprintf(w, "Error: %s", tx.Error)
 			return
 		}
-		fmt.Fprintf(w, "ID\tTimeStamp\tDuration\tSize\tStatus\tRemoteIp\tRemotePort\tProto\tMethod\tHost\tUri\tUserAgent\tCfRay\tCfConnectingIp\tCfIPCountry\tXForwardedFor\tTlsServerName\n")
+		fmt.Fprintf(w, "ID\tTimeStamp\tDuration\tSize\tStatus\tRemoteIp\tRemotePort\tProto\tMethod\tHost\tDomain\tUri\tUserAgent\tCfRay\tCfConnectingIp\tCfIPCountry\tXForwardedFor\tTlsServerName\n")
 		for _, result := range results {
-			fmt.Fprintf(w, "%d\t%s\t%d\t%d\t%d\t%s\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", result.ID, result.TimeStamp, result.Duration, result.Size, result.Status, result.RemoteIp, result.RemotePort, result.Proto, result.Method, result.Host, result.Uri, result.UserAgent, result.CfRay, result.CfConnectingIp, result.CfIPCountry, result.XForwardedFor, result.TlsServerName)
+			fmt.Fprintf(w, "%d\t%s\t%d\t%d\t%d\t%s\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", result.ID,
+				result.TimeStamp, result.Duration, result.Size, result.Status, result.RemoteIp, result.RemotePort, result.Proto, result.Method,
+				result.Host, result.Domain, result.Uri, result.UserAgent, result.CfRay, result.CfConnectingIp, result.CfIPCountry, result.XForwardedFor,
+				result.TlsServerName)
+		}
+	})
+
+	http.HandleFunc("/logs2", func(w http.ResponseWriter, r *http.Request) {
+		var results []Log
+		tx := db.Order("id DESC").Limit(1000).Find(&results)
+		if tx.Error != nil {
+			fmt.Fprintf(w, "Error: %s", tx.Error)
+			return
+		}
+		fmt.Fprintf(w, "IT\tStatus\tRemoteIp\tDomain\tHost\tUri\tUserAgent\n")
+		for _, result := range results {
+			fmt.Fprintf(w, "%d\t%d\t%s\t%s\t%s\t%s\t%s\n", result.ID, result.Status, result.RemoteIp, result.Domain, result.Host, result.Uri, result.UserAgent)
 		}
 	})
 
@@ -74,16 +98,4 @@ func startApi(port int, db *gorm.DB) {
 	if err := http.ListenAndServe(fmt.Sprintf("127.0.0.1:%d", port), nil); err != nil {
 		fmt.Println("API error:", err)
 	}
-}
-
-type resultHost struct {
-	Date    string
-	Hits    int
-	Traffic int64
-}
-
-type resultHosts struct {
-	Host    string
-	Hits    int
-	Traffic int64
 }
