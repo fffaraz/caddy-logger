@@ -1,12 +1,10 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"net"
 	"os"
 	"sync"
-	"time"
 
 	"gorm.io/gorm"
 )
@@ -20,10 +18,11 @@ func getUnixConn(socketAddr string) (net.Conn, error) {
 		}
 	}
 
-	conn, err := net.ListenUnixgram("unixgram", &net.UnixAddr{
+	addr := net.UnixAddr{
 		Name: socketAddr,
 		Net:  "unixgram",
-	})
+	}
+	conn, err := net.ListenUnixgram("unixgram", &addr)
 	if err != nil {
 		fmt.Println("Error listening:", err)
 		return nil, err
@@ -34,10 +33,11 @@ func getUnixConn(socketAddr string) (net.Conn, error) {
 }
 
 func getUdpConn(listenPort int) (net.Conn, error) {
-	conn, err := net.ListenUDP("udp", &net.UDPAddr{
+	addr := net.UDPAddr{
 		IP:   net.IPv4(127, 0, 0, 1),
 		Port: listenPort,
-	})
+	}
+	conn, err := net.ListenUDP("udp", &addr)
 	if err != nil {
 		fmt.Println("Error listening:", err)
 		return nil, err
@@ -48,16 +48,17 @@ func getUdpConn(listenPort int) (net.Conn, error) {
 }
 
 func readConn(conn net.Conn, db *gorm.DB, wg *sync.WaitGroup) {
+	buf := make([]byte, 1024*64)
+	msg := Message{}
+	log := Log{}
 	for {
-		buf := make([]byte, 1024*64)
 		nr, err := conn.Read(buf)
-		startTime := time.Now()
+		// startTime := time.Now()
 		if err != nil {
 			fmt.Println("Error reading:", err)
 			break
 		}
-		_, log, err := getMessage(buf[:nr])
-		if err != nil {
+		if err := getMessage(buf[:nr], &msg, &log); err != nil {
 			fmt.Println("Error getting log message:", err)
 			continue
 		}
@@ -65,10 +66,8 @@ func readConn(conn net.Conn, db *gorm.DB, wg *sync.WaitGroup) {
 			fmt.Println("Error saving log message:", err)
 			continue
 		}
-		if false {
-			infoStr, _ := json.Marshal(log)
-			fmt.Println(time.Since(startTime).Milliseconds(), string(infoStr))
-		}
+		// infoStr, _ := json.Marshal(log)
+		// fmt.Println(time.Since(startTime).Milliseconds(), string(infoStr))
 	}
 	wg.Done()
 }

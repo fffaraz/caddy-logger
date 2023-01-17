@@ -10,7 +10,8 @@ import (
 func startApi(port int, db *gorm.DB) {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		var count int64
-		db.Model(&Log{}).Count(&count)
+		var model Log
+		db.Model(&model).Count(&count)
 		fmt.Fprintf(w, "Hello, %s\n%d\n", r.RemoteAddr, count)
 	})
 

@@ -7,15 +7,32 @@ import (
 	"time"
 )
 
-func getMessage(buf []byte) (*Message, *Log, error) {
+func getMessage(buf []byte, msg *Message, log *Log) error {
 	// fmt.Println(string(buf))
 
-	msg := &Message{}
+	msg.Level = ""
+	msg.Ts = 0
+	msg.Logger = ""
+	msg.Msg = ""
+	msg.UserId = ""
+	msg.Duration = 0
+	msg.Size = 0
+	msg.Status = 0
+	msg.Request.RemoteIp = ""
+	msg.Request.RemotePort = ""
+	msg.Request.Proto = ""
+	msg.Request.Method = ""
+	msg.Request.Host = ""
+	msg.Request.Uri = ""
+	msg.Request.Headers = nil
+	msg.Request.Tls = nil
+	msg.RespHeaders = nil
+
 	if err := json.Unmarshal(buf, msg); err != nil {
-		return nil, nil, err
+		return err
 	}
 
-	log := &Log{}
+	log.ID = 0
 	log.TimeStamp = time.Unix(int64(msg.Ts), 0)
 	log.Duration = time.Duration(msg.Duration * float64(time.Second))
 	log.Size = msg.Size
@@ -34,9 +51,11 @@ func getMessage(buf []byte) (*Message, *Log, error) {
 	log.XForwardedFor = getHeader(msg, "X-Forwarded-For")
 	if msg.Request.Tls != nil {
 		log.TlsServerName = msg.Request.Tls.ServerName
+	} else {
+		log.TlsServerName = ""
 	}
 
-	return msg, log, nil
+	return nil
 }
 
 func getHeader(msg *Message, key string) string {
