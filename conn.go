@@ -62,11 +62,11 @@ func readConn(conn net.Conn, db *gorm.DB, wg *sync.WaitGroup) {
 			fmt.Println("Error getting log message:", err)
 			continue
 		}
-		if err := db.Create(log).Error; err != nil {
+		if err := db.Create(&log).Error; err != nil {
 			fmt.Println("Error saving log message:", err)
 			continue
 		}
-		// infoStr, _ := json.Marshal(log)
+		// infoStr, _ := json.Marshal(&log)
 		// fmt.Println(time.Since(startTime).Milliseconds(), string(infoStr))
 	}
 	wg.Done()
