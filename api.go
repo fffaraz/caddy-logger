@@ -61,33 +61,31 @@ func startApi(port int, db *gorm.DB) {
 		}
 	})
 
-	http.HandleFunc("/logs", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/log", func(w http.ResponseWriter, r *http.Request) {
+		simple := r.URL.Query().Get("simple") == "1"
+		domain := r.URL.Query().Get("d")
+		if domain == "" {
+			fmt.Fprintf(w, "Error: missing domain (?d=...) parameter")
+			return
+		}
 		var results []Log
-		tx := db.Order("id DESC").Limit(1000).Find(&results)
+		tx := db.Where("domain like ?", domain).Order("id DESC").Limit(5000).Find(&results)
 		if tx.Error != nil {
 			fmt.Fprintf(w, "Error: %s", tx.Error)
 			return
 		}
-		fmt.Fprintf(w, "ID\tTimeStamp\tDuration\tSize\tStatus\tRemoteIp\tRemotePort\tProto\tMethod\tHost\tDomain\tUri\tUserAgent\tCfRay\tCfConnectingIp\tCfIPCountry\tXForwardedFor\tTlsServerName\n")
-		for _, result := range results {
-			fmt.Fprintf(w, "%d\t%s\t%d\t%d\t%d\t%s\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", result.ID,
-				result.TimeStamp, result.Duration, result.Size, result.Status, result.RemoteIp, result.RemotePort, result.Proto, result.Method,
-				result.Host, result.Domain, result.Uri, result.UserAgent, result.CfRay, result.CfConnectingIp, result.CfIPCountry, result.XForwardedFor,
-				result.TlsServerName)
-		}
+		printLogs(w, results, simple)
 	})
 
-	http.HandleFunc("/logs2", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/logs", func(w http.ResponseWriter, r *http.Request) {
+		simple := r.URL.Query().Get("simple") == "1"
 		var results []Log
-		tx := db.Order("id DESC").Limit(1000).Find(&results)
+		tx := db.Order("id DESC").Limit(5000).Find(&results)
 		if tx.Error != nil {
 			fmt.Fprintf(w, "Error: %s", tx.Error)
 			return
 		}
-		fmt.Fprintf(w, "ID\tStatus\tRemoteIp\tDomain\tHost\tUri\tUserAgent\n")
-		for _, result := range results {
-			fmt.Fprintf(w, "%d\t%d\t%s\t%s\t%s\t%s\t%s\n", result.ID, result.Status, result.RemoteIp, result.Domain, result.Host, result.Uri, result.UserAgent)
-		}
+		printLogs(w, results, simple)
 	})
 
 	http.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
@@ -98,5 +96,22 @@ func startApi(port int, db *gorm.DB) {
 	fmt.Printf("Starting API on port %d\n", port)
 	if err := http.ListenAndServe(fmt.Sprintf("127.0.0.1:%d", port), nil); err != nil {
 		fmt.Println("API error:", err)
+	}
+}
+
+func printLogs(w http.ResponseWriter, results []Log, simple bool) {
+	if simple {
+		fmt.Fprintf(w, "ID\tStatus\tRemoteIp\tDomain\tHost\tUri\tUserAgent\n")
+		for _, result := range results {
+			fmt.Fprintf(w, "%d\t%d\t%s\t%s\t%s\t%s\t%s\n", result.ID, result.Status, result.RemoteIp, result.Domain, result.Host, result.Uri, result.UserAgent)
+		}
+	} else {
+		fmt.Fprintf(w, "ID\tTimeStamp\tDuration\tSize\tStatus\tRemoteIp\tRemotePort\tProto\tMethod\tHost\tDomain\tUri\tUserAgent\tCfRay\tCfConnectingIp\tCfIPCountry\tXForwardedFor\tTlsServerName\n")
+		for _, result := range results {
+			fmt.Fprintf(w, "%d\t%s\t%d\t%d\t%d\t%s\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", result.ID,
+				result.TimeStamp, result.Duration, result.Size, result.Status, result.RemoteIp, result.RemotePort, result.Proto, result.Method,
+				result.Host, result.Domain, result.Uri, result.UserAgent, result.CfRay, result.CfConnectingIp, result.CfIPCountry, result.XForwardedFor,
+				result.TlsServerName)
+		}
 	}
 }
