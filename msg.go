@@ -84,6 +84,8 @@ func getDomain(host string) string {
 		host = host[:i] // remove port
 	}
 
+	host = strings.Trim(host, ".") // remove trailing dot
+
 	parts := strings.Split(host, ".")
 	if len(parts) <= 2 {
 		return host
