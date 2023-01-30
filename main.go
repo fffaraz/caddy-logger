@@ -6,8 +6,10 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
+	"time"
 )
 
 func main() {
@@ -17,7 +19,10 @@ func main() {
 	socketAddr := flag.String("s", "", "socket address")
 	flag.Parse()
 
-	db, err := getDB(*dbPath)
+	currentTime := time.Now().Format("2006-01-02-15-04-05")
+	newDBPath := strings.Replace(*dbPath, "timestamp", currentTime, -1)
+
+	db, err := getDB(newDBPath)
 	if err != nil {
 		fmt.Println("Error opening database:", err)
 		return
