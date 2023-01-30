@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"sync"
 
 	"gorm.io/gorm"
 )
@@ -47,10 +46,10 @@ func getUdpConn(listenPort int) (net.Conn, error) {
 	return conn, nil
 }
 
-func readConn(conn net.Conn, db *gorm.DB, wg *sync.WaitGroup) {
+func readConn(conn net.Conn, db *gorm.DB) {
 	buf := make([]byte, 1024*64)
-	msg := Message{}
-	log := Log{}
+	msg := &Message{}
+	log := &Log{}
 	for {
 		nr, err := conn.Read(buf)
 		// startTime := time.Now()
@@ -58,16 +57,15 @@ func readConn(conn net.Conn, db *gorm.DB, wg *sync.WaitGroup) {
 			fmt.Println("Error reading:", err)
 			break
 		}
-		if err := getMessage(buf[:nr], &msg, &log); err != nil {
+		if err := getMessage(buf[:nr], msg, log); err != nil {
 			fmt.Println("Error getting log message:", err)
 			continue
 		}
-		if err := db.Create(&log).Error; err != nil {
+		if err := db.Create(log).Error; err != nil {
 			fmt.Println("Error saving log message:", err)
-			continue
+			break
 		}
-		// infoStr, _ := json.Marshal(&log)
+		// infoStr, _ := json.Marshal(log)
 		// fmt.Println(time.Since(startTime).Milliseconds(), string(infoStr))
 	}
-	wg.Done()
 }

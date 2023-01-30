@@ -1,4 +1,5 @@
 .git/
 volumes/
 *.exe
+*.sqlite*
 caddy-logger

@@ -84,7 +84,7 @@ func startApi(port int, db *gorm.DB) {
 			fmt.Fprintf(w, "Error: %s", tx.Error)
 			return
 		}
-		fmt.Fprintf(w, "IT\tStatus\tRemoteIp\tDomain\tHost\tUri\tUserAgent\n")
+		fmt.Fprintf(w, "ID\tStatus\tRemoteIp\tDomain\tHost\tUri\tUserAgent\n")
 		for _, result := range results {
 			fmt.Fprintf(w, "%d\t%d\t%s\t%s\t%s\t%s\t%s\n", result.ID, result.Status, result.RemoteIp, result.Domain, result.Host, result.Uri, result.UserAgent)
 		}

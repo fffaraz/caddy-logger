@@ -1,3 +1,4 @@
 volumes/
 *.exe
+*.sqlite*
 caddy-logger

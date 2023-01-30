@@ -12,7 +12,7 @@ import (
 
 func main() {
 	apiPort := flag.Int("a", 0, "api port")
-	dbPath := flag.String("d", "", "database path")
+	dbPath := flag.String("d", "db.sqlite", "database path")
 	listenPort := flag.Int("p", 0, "listen port")
 	socketAddr := flag.String("s", "", "socket address")
 	flag.Parse()
@@ -22,6 +22,13 @@ func main() {
 		fmt.Println("Error opening database:", err)
 		return
 	}
+
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println("Error getting database:", err)
+		return
+	}
+	defer sqlDB.Close()
 
 	if *apiPort != 0 {
 		go startApi(*apiPort, db)
@@ -47,14 +54,19 @@ func main() {
 		return
 	}
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go readConn(conn, db, &wg)
-
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
-	<-ch
 
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	go func() {
+		readConn(conn, db)
+		ch <- syscall.SIGTERM
+		wg.Done()
+	}()
+
+	<-ch
 	conn.Close()
 	wg.Wait()
 
