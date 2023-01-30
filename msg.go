@@ -45,9 +45,9 @@ func getMessage(buf []byte, msg *Message, log *Log) error {
 	log.Domain = getDomain(msg.Request.Host)
 	log.Uri = msg.Request.Uri
 	log.UserAgent = getHeader(msg, "User-Agent")
-	log.CfRay = getHeader(msg, "CF-Ray")
-	log.CfConnectingIp = getHeader(msg, "CF-Connecting-IP")
-	log.CfIPCountry = getHeader(msg, "CF-IPCountry")
+	log.CfRay = getHeader(msg, "Cf-Ray")
+	log.CfConnectingIp = getHeader(msg, "Cf-Connecting-Ip")
+	log.CfIPCountry = getHeader(msg, "Cf-Ipcountry")
 	log.XForwardedFor = getHeader(msg, "X-Forwarded-For")
 	if msg.Request.Tls != nil {
 		log.TlsServerName = msg.Request.Tls.ServerName
