@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-
-	"gorm.io/gorm"
 )
 
 func getUnixConn(socketAddr string) (net.Conn, error) {
@@ -44,37 +42,4 @@ func getUdpConn(listenPort int) (net.Conn, error) {
 
 	fmt.Println("Listening on port", listenPort)
 	return conn, nil
-}
-
-func readConn(conn net.Conn, db *gorm.DB) {
-	buf := make([]byte, 1024*64)
-	msg := &Message{}
-	log := &Log{}
-	counter := 0
-	for {
-		counter++
-		if counter > 5_000_000 {
-			break
-		}
-
-		nr, err := conn.Read(buf)
-		// startTime := time.Now()
-		if err != nil {
-			fmt.Println("Error reading:", err)
-			break
-		}
-
-		if err := getMessage(buf[:nr], msg, log); err != nil {
-			fmt.Println("Error getting log message:", err)
-			continue
-		}
-
-		if err := db.Create(log).Error; err != nil {
-			fmt.Println("Error saving log message:", err)
-			break
-		}
-
-		// infoStr, _ := json.Marshal(log)
-		// fmt.Println(time.Since(startTime).Milliseconds(), string(infoStr))
-	}
 }

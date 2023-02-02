@@ -12,7 +12,7 @@ func startApi(port int, db *gorm.DB) {
 		var count int64
 		var model Log
 		db.Model(&model).Count(&count)
-		fmt.Fprintf(w, "Hello, %s\n%d\n", r.RemoteAddr, count)
+		fmt.Fprintf(w, "Hello, %s\n%d\n%f\n", r.RemoteAddr, count, msgPerSecond)
 	})
 
 	http.HandleFunc("/domains", func(w http.ResponseWriter, r *http.Request) {
@@ -61,6 +61,17 @@ func startApi(port int, db *gorm.DB) {
 		}
 	})
 
+	http.HandleFunc("/logs", func(w http.ResponseWriter, r *http.Request) {
+		simple := r.URL.Query().Get("simple") == "1"
+		var results []Log
+		tx := db.Order("id DESC").Limit(5000).Find(&results)
+		if tx.Error != nil {
+			fmt.Fprintf(w, "Error: %s", tx.Error)
+			return
+		}
+		printLogs(w, results, simple)
+	})
+
 	http.HandleFunc("/log", func(w http.ResponseWriter, r *http.Request) {
 		simple := r.URL.Query().Get("simple") == "1"
 		domain := r.URL.Query().Get("d")
@@ -70,17 +81,6 @@ func startApi(port int, db *gorm.DB) {
 		}
 		var results []Log
 		tx := db.Where("domain like ?", domain).Order("id DESC").Limit(5000).Find(&results)
-		if tx.Error != nil {
-			fmt.Fprintf(w, "Error: %s", tx.Error)
-			return
-		}
-		printLogs(w, results, simple)
-	})
-
-	http.HandleFunc("/logs", func(w http.ResponseWriter, r *http.Request) {
-		simple := r.URL.Query().Get("simple") == "1"
-		var results []Log
-		tx := db.Order("id DESC").Limit(5000).Find(&results)
 		if tx.Error != nil {
 			fmt.Fprintf(w, "Error: %s", tx.Error)
 			return
