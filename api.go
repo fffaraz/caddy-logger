@@ -2,12 +2,14 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"log"
 	"net/http"
 
 	"gorm.io/gorm"
 )
 
-func startApi(port int, db *gorm.DB) {
+func startAPI(port int, db *gorm.DB) {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		var count int64
 		var model Log
@@ -90,28 +92,30 @@ func startApi(port int, db *gorm.DB) {
 
 	http.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("404 - Not Found"))
+		if _, err := w.Write([]byte("404 - Not Found")); err != nil {
+			log.Println("Error:", err)
+		}
 	})
 
-	fmt.Printf("Starting API on port %d\n", port)
+	log.Printf("Starting API on port %d\n", port)
 	if err := http.ListenAndServe(fmt.Sprintf("127.0.0.1:%d", port), nil); err != nil {
-		fmt.Println("API error:", err)
+		log.Println("API error:", err)
 	}
 }
 
-func printLogs(w http.ResponseWriter, results []Log, simple bool) {
+func printLogs(w io.Writer, results []Log, simple bool) {
 	if simple {
 		fmt.Fprintf(w, "ID\tStatus\tRemoteIp\tDomain\tHost\tUri\tUserAgent\n")
 		for _, result := range results {
-			fmt.Fprintf(w, "%d\t%d\t%s\t%s\t%s\t%s\t%s\n", result.ID, result.Status, result.RemoteIp, result.Domain, result.Host, result.Uri, result.UserAgent)
+			fmt.Fprintf(w, "%d\t%d\t%s\t%s\t%s\t%s\t%s\n", result.ID, result.Status, result.RemoteIP, result.Domain, result.Host, result.URI, result.UserAgent)
 		}
 	} else {
 		fmt.Fprintf(w, "ID\tTimeStamp\tDuration\tSize\tStatus\tRemoteIp\tRemotePort\tProto\tMethod\tHost\tDomain\tUri\tUserAgent\tCfRay\tCfConnectingIp\tCfIPCountry\tXForwardedFor\tTlsServerName\n")
 		for _, result := range results {
 			fmt.Fprintf(w, "%d\t%s\t%d\t%d\t%d\t%s\t%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", result.ID,
-				result.TimeStamp, result.Duration, result.Size, result.Status, result.RemoteIp, result.RemotePort, result.Proto, result.Method,
-				result.Host, result.Domain, result.Uri, result.UserAgent, result.CfRay, result.CfConnectingIp, result.CfIPCountry, result.XForwardedFor,
-				result.TlsServerName)
+				result.TimeStamp, result.Duration, result.Size, result.Status, result.RemoteIP, result.RemotePort, result.Proto, result.Method,
+				result.Host, result.Domain, result.URI, result.UserAgent, result.CfRay, result.CfConnectingIP, result.CfIPCountry, result.XForwardedFor,
+				result.TLSServerName)
 		}
 	}
 }

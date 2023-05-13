@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"net"
 	"time"
 
@@ -13,8 +13,8 @@ var msgPerSecond float64
 
 func readConn(conn net.Conn, db *gorm.DB) {
 	buf := make([]byte, 1024*64)
-	msg := &Message{}
-	log := &Log{}
+	var msg Message
+	var obj Log
 
 	numMessages := 0
 	totalCounter := 0
@@ -24,7 +24,7 @@ func readConn(conn net.Conn, db *gorm.DB) {
 		numMessages++
 		totalCounter++
 		if totalCounter > 5_000_000 {
-			fmt.Println("Restarting")
+			log.Println("Restarting")
 			break
 		}
 
@@ -39,31 +39,35 @@ func readConn(conn net.Conn, db *gorm.DB) {
 		nr, err := conn.Read(buf)
 		processTimeBegin := time.Now()
 		if err != nil {
-			fmt.Println("Error reading:", err)
+			log.Println("Error reading:", err)
 			break
 		}
 
-		if err := getMessage(buf[:nr], msg, log); err != nil {
-			fmt.Println("Error getting log message:", err)
+		if err := getMessage(buf[:nr], &msg, &obj); err != nil {
+			log.Println("Error getting log message:", err)
 			continue
 		}
 
-		if err := db.Create(log).Error; err != nil {
-			fmt.Println("Error saving log message:", err)
+		if err := db.Create(&obj).Error; err != nil {
+			log.Println("Error saving log message:", err)
 			break
 		}
 
 		processTimeEnd := time.Since(processTimeBegin)
 		if processTimeEnd > time.Millisecond*100 {
-			infoStr, _ := json.Marshal(log)
-			fmt.Println("Slow query:", processTimeEnd.Milliseconds(), string(infoStr))
+			infoStr, err := json.Marshal(&obj)
+			if err != nil {
+				log.Println("Error marshalling log:", err)
+				continue
+			}
+			log.Println("Slow query:", processTimeEnd.Milliseconds(), string(infoStr))
 		}
 	}
 }
 
-func approxRollingAverage(avg, input float64, N int) float64 {
+func approxRollingAverage(avg, input float64, n int) float64 {
 	// accumulator = (alpha * new_value) + (1.0 - alpha) * accumulator
-	avg -= avg / float64(N)
-	avg += input / float64(N)
+	avg -= avg / float64(n)
+	avg += input / float64(n)
 	return avg
 }

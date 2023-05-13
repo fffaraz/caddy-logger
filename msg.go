@@ -11,21 +11,21 @@ func getMessage(buf []byte, msg *Message, log *Log) error {
 	// fmt.Println(string(buf))
 
 	msg.Level = ""
-	msg.Ts = 0
+	msg.TS = 0
 	msg.Logger = ""
 	msg.Msg = ""
-	msg.UserId = ""
+	msg.UserID = ""
 	msg.Duration = 0
 	msg.Size = 0
 	msg.Status = 0
-	msg.Request.RemoteIp = ""
+	msg.Request.RemoteIP = ""
 	msg.Request.RemotePort = ""
 	msg.Request.Proto = ""
 	msg.Request.Method = ""
 	msg.Request.Host = ""
-	msg.Request.Uri = ""
+	msg.Request.URI = ""
 	msg.Request.Headers = nil
-	msg.Request.Tls = nil
+	msg.Request.TLS = nil
 	msg.RespHeaders = nil
 
 	if err := json.Unmarshal(buf, msg); err != nil {
@@ -33,26 +33,26 @@ func getMessage(buf []byte, msg *Message, log *Log) error {
 	}
 
 	log.ID = 0
-	log.TimeStamp = time.Unix(int64(msg.Ts), 0)
+	log.TimeStamp = time.Unix(int64(msg.TS), 0)
 	log.Duration = time.Duration(msg.Duration * float64(time.Second))
 	log.Size = msg.Size
 	log.Status = msg.Status
-	log.RemoteIp = msg.Request.RemoteIp
+	log.RemoteIP = msg.Request.RemoteIP
 	log.RemotePort, _ = strconv.Atoi(msg.Request.RemotePort)
 	log.Proto = msg.Request.Proto
 	log.Method = msg.Request.Method
 	log.Host = msg.Request.Host
 	log.Domain = getDomain(msg.Request.Host)
-	log.Uri = msg.Request.Uri
+	log.URI = msg.Request.URI
 	log.UserAgent = getHeader(msg, "User-Agent")
 	log.CfRay = getHeader(msg, "Cf-Ray")
-	log.CfConnectingIp = getHeader(msg, "Cf-Connecting-Ip")
+	log.CfConnectingIP = getHeader(msg, "Cf-Connecting-Ip")
 	log.CfIPCountry = getHeader(msg, "Cf-Ipcountry")
 	log.XForwardedFor = getHeader(msg, "X-Forwarded-For")
-	if msg.Request.Tls != nil {
-		log.TlsServerName = msg.Request.Tls.ServerName
+	if msg.Request.TLS != nil {
+		log.TLSServerName = msg.Request.TLS.ServerName
 	} else {
-		log.TlsServerName = ""
+		log.TLSServerName = ""
 	}
 
 	return nil

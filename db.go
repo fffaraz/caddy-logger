@@ -15,19 +15,19 @@ type Log struct {
 	Duration       time.Duration ``
 	Size           int64         ``
 	Status         int           `gorm:"index"`
-	RemoteIp       string        `gorm:"index"`
+	RemoteIP       string        `gorm:"index"`
 	RemotePort     int           ``
 	Proto          string        ``
 	Method         string        ``
 	Host           string        ``
 	Domain         string        `gorm:"index"`
-	Uri            string        ``
+	URI            string        ``
 	UserAgent      string        ``
-	CfRay          string        `` // Cloudflare Ray ID
-	CfConnectingIp string        ``
+	CfRay          string        ``
+	CfConnectingIP string        ``
 	CfIPCountry    string        ``
 	XForwardedFor  string        ``
-	TlsServerName  string        ``
+	TLSServerName  string        ``
 }
 
 func getDB(dbPath string) (*gorm.DB, error) {

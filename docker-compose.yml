@@ -6,6 +6,6 @@ services:
     image: fffaraz/caddy-logger:latest
     restart: always
     network_mode: host
-    command: -a 8080 -d /srv/db-timestamp.sqlite -p 5000
+    command: -api 8080 -db /data/db-timestamp.sqlite -port 5000
     volumes:
-      - ./volumes:/srv
+      - ./volumes:/data

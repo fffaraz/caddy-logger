@@ -2,10 +2,10 @@ package main
 
 type Message struct {
 	Level       string              `json:"level"`
-	Ts          float64             `json:"ts"`
+	TS          float64             `json:"ts"`
 	Logger      string              `json:"logger"`
 	Msg         string              `json:"msg"`
-	UserId      string              `json:"user_id"`
+	UserID      string              `json:"user_id"`
 	Duration    float64             `json:"duration"`
 	Size        int64               `json:"size"`
 	Status      int                 `json:"status"`
@@ -20,17 +20,17 @@ type Message struct {
 }
 
 type Request struct {
-	RemoteIp   string              `json:"remote_ip"`
+	RemoteIP   string              `json:"remote_ip"`
 	RemotePort string              `json:"remote_port"`
 	Proto      string              `json:"proto"`
 	Method     string              `json:"method"`
 	Host       string              `json:"host"`
-	Uri        string              `json:"uri"`
+	URI        string              `json:"uri"`
 	Headers    map[string][]string `json:"headers"`
-	Tls        *Tls                `json:"tls,omitempty"`
+	TLS        *TLSInfo            `json:"tls,omitempty"`
 }
 
-type Tls struct {
+type TLSInfo struct {
 	Resumed     bool   `json:"resumed"`
 	Version     int    `json:"version"`
 	CipherSuite int    `json:"cipher_suite"`
