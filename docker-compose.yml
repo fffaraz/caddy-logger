@@ -4,8 +4,9 @@ services:
   app:
     build: .
     image: fffaraz/caddy-logger:latest
+    container_name: caddy-logger
     restart: always
     network_mode: host
-    command: -api 8080 -db /data/db-timestamp.sqlite -port 5000
+    command: -api 8080 -db /data/db-timestamp.sqlite3 -port 5000
     volumes:
       - ./volumes:/data

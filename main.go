@@ -15,7 +15,7 @@ import (
 
 func main() {
 	apiPort := flag.Int("api", 0, "api port")
-	dbPath := flag.String("db", "db.sqlite", "database path")
+	dbPath := flag.String("db", "db.sqlite3", "database path")
 	listenPort := flag.Int("port", 0, "listen port")
 	socketAddr := flag.String("socket", "", "socket address")
 	flag.Parse()
